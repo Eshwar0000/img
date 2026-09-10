@@ -3,31 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video Compressor</title>
+<title>3GB to 300MB Compressor</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
-body{background:#0a0a0a;color:#fff;padding:15px}
-.container{max-width:500px;margin:auto}
-h1{text-align:center;margin:20px 0;font-size:26px}
-h1 span{color:#a855f7}
-.card{background:#1a1a1a;border:1px solid #333;border-radius:16px;padding:18px;margin:15px 0}
-.upload{border:2px dashed #555;border-radius:12px;padding:35px;text-align:center}
-video{width:100%;border-radius:10px;background:#000;margin:10px 0}
-select{width:100%;padding:12px;background:#222;border:1px solid #444;border-radius:8px;color:#fff;margin:8px 0}
-.btn{width:100%;padding:14px;background:#a855f7;border:none;border-radius:10px;color:#fff;font-weight:bold;font-size:16px}
-#log{background:#111;padding:8px;border-radius:6px;font-size:11px;color:#0f0;height:80px;overflow:auto;margin-top:10px}
-.info{font-size:13px;color:#aaa;display:flex;justify-content:space-between;margin:5px 0}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#fff;font-family:Arial;padding:15px}
+h1{text-align:center;margin:15px 0;font-size:28px}h1 span{color:#a855f7}
+.card{max-width:600px;margin:12px auto;background:#1a1a1a;padding:18px;border-radius:14px;border:1px solid #333}
+.upload{border:2px dashed #a855f7;border-radius:14px;padding:45px 15px;text-align:center;display:block;cursor:pointer}
+#fileInput{display:none}
+video{width:100%;border-radius:10px;background:#000}
+input,select,.btn{width:100%;padding:13px;margin:7px 0;border-radius:8px;border:none}
+input,select{background:#222;color:#fff}
+.btn{background:#a855f7;color:#fff;font-weight:bold;font-size:17px;cursor:pointer}
+.btn:disabled{background:#444}
+#log{background:#000;color:#0f0;padding:10px;border-radius:8px;font-size:11px;max-height:130px;overflow:auto;white-space:pre-wrap}
+#download a{display:block;background:#22c55e;color:#fff;padding:14px;border-radius:8px;text-align:center;text-decoration:none;font-weight:bold}
+.warn{background:#3f1a1a;border:1px solid #ff4444;color:#ffaaaa;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px}
 </style>
 </head>
 <body>
-<div class="container">
-<h1>Video <span>Compressor</span></h1>
+<h1>3GB to <span>300MB</span> Compressor</h1>
+
 <div class="card">
-<div class="upload" id="drop">📹 Click to Upload Video<br><small>Any video</small>
-<input type="file" id="file" accept="video/*" hidden>
+<label for="fileInput" class="upload">
+<div style="font-size:22px">📹 Click - Select Video (Upto 3GB)</div>
+<small style="color:#aaa">100% Private - Phone nalle agutte</small>
+</label>
+<input type="file" id="fileInput" accept="video/*">
+<div id="fileInfo" style="text-align:center;margin-top:10px;color:#aaa"></div>
 </div>
-<video id="preview" controls hidden></video>
-<div class="info"><span id="origSize"></span><span id="dur"></span></div>
+
+<div class="card" id="prevCard" style="display:none">
+<video id="v" controls></video>
 </div>
-<div class="card">
-<select id="res
+
+<div class="card" id="ctrlCard" style="display:none">
+<div class="warn" id="warnBox" style="display:none">⚠️ Dodda file! 1.5GB+ idre Mobile nalli hang agbahudu. PC nalli try madi illa 2 part madi.</div>
+
+<label>Compression Mode (3GB -> 300MB ge):</label>
+<select id="quality">
+<option value="ultra">🔥 ULTRA - 3GB to ~300MB (360p, Best for size)</option>
+<option value="high" selected>⚡ HIGH - 3GB to ~500MB (480p, Good Quality)</option>
+<option value="medium">HD - 3GB to ~1GB (720p, Good Quality)</option>
+</select>
+
+<div style="display:flex;gap:10px">
+<div style="flex:1"><label>First Cut (sec):</label><input type="number" id="sTime" value="0" min="0"></div>
+<div style="flex:1"><label>End at (sec):</label><input type="number" id="eTime" value="0" min="0"></div>
+</div>
+
+<button class="btn" id="goBtn">🚀 COMPRESS NOW</button>
+<div id="log">Ready!</div>
+<div id="download" style="display:none"><a id="dl" download="compressed_300MB.mp4">⬇️ DOWNLOAD 300MB VIDEO</a><p id="finalSize" style="text-align:center;margin-top:8px;color:#22c55e"></p></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+<script>
+const fileInput=document.getElementById('fileInput'), v=document.getElementById('v'),
+prevCard=document.getElementById('prevCard'), ctrlCard=document.getElementById('ctrlCard'),
+fileInfo=document.getElementById('fileInfo'), logEl=document.getElementById('log'),
+goBtn=document.getElementById('goBtn'), dl=document.getElementById('dl'), download=document.getElementById('download'),
+warnBox=document.getElementById('warnBox');
+let file=null;
+function log(m){logEl.textContent+="\n"+m; logEl.scrollTop=logEl.scrollHeight;}
+
+fileInput.addEventListener('change',e=>{
+ file=e.target.files[0]; if(!file) return;
+ const sizeGB=(file.size/1024/1024/1024).toFixed(2);
+ fileInfo.textContent=file.name+" - "+sizeGB+" GB ("+(file.size/1024/1024).toFixed(0)+" MB)";
+ v.src=URL.createObjectURL(file);
+ prevCard.style.display='block'; ctrlCard.style.display='block';
+ if(file.size > 1.5*1024*1024*1024) warnBox.style.display='block'; else warnBox.style.display='none';
+ log("Loaded: "+sizeGB+" GB file. Ready to compress to 300MB!");
+});
+
+goBtn.addEventListener('click', async()=>{
+ if(!file) return alert('Video select madi');
+ if(file.size > 2.5*1024*1024*1024){ if(!confirm('3GB file! Phone hang agbahudu. Continue?')) return; }
+ goBtn.disabled=true; goBtn.textContent='Loading Compressor...'; download.style.display='none'; logEl.textContent='';
+ try{
+  const {createFFmpeg, fetchFile}=FFmpeg;
+  const ffmpeg=createFFmpeg({log:false});
+  await ffmpeg.load(); log("Compressor loaded!");
+  ffmpeg.FS('writeFile','in.mp4',await fetchFile(file));
+  const mode=document.getElementById('quality').value;
+  let vf='scale=-2
