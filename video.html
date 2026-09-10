@@ -7,84 +7,84 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0a0a;color:#fff;font-family:Arial;padding:15px}
-h1{text-align:center;margin:15px 0;font-size:28px}h1 span{color:#a855f7}
-.card{max-width:600px;margin:12px auto;background:#1a1a1a;padding:18px;border-radius:14px;border:1px solid #333}
-.upload{border:2px dashed #a855f7;border-radius:14px;padding:45px 15px;text-align:center;display:block;cursor:pointer}
+h1{text-align:center;margin:15px 0;font-size:26px}h1 span{color:#a855f7}
+.card{max-width:600px;margin:12px auto;background:#1a1a1a;padding:16px;border-radius:14px;border:1px solid #333}
+.upload{border:2px dashed #a855f7;border-radius:14px;padding:35px 10px;text-align:center;display:block;cursor:pointer}
 #fileInput{display:none}
 video{width:100%;border-radius:10px;background:#000}
-input,select,.btn{width:100%;padding:13px;margin:7px 0;border-radius:8px;border:none}
-input,select{background:#222;color:#fff}
-.btn{background:#a855f7;color:#fff;font-weight:bold;font-size:17px;cursor:pointer}
+select,input,.btn{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:none}
+select,input{background:#222;color:#fff}
+.btn{background:#a855f7;color:#fff;font-weight:bold;font-size:17px}
 .btn:disabled{background:#444}
-#log{background:#000;color:#0f0;padding:10px;border-radius:8px;font-size:11px;max-height:130px;overflow:auto;white-space:pre-wrap}
-#download a{display:block;background:#22c55e;color:#fff;padding:14px;border-radius:8px;text-align:center;text-decoration:none;font-weight:bold}
-.warn{background:#3f1a1a;border:1px solid #ff4444;color:#ffaaaa;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px}
+#log{background:#000;color:#0f0;padding:8px;border-radius:8px;font-size:11px;max-height:120px;overflow:auto;white-space:pre-wrap}
 </style>
 </head>
 <body>
 <h1>3GB to <span>300MB</span> Compressor</h1>
-
 <div class="card">
-<label for="fileInput" class="upload">
-<div style="font-size:22px">📹 Click - Select Video (Upto 3GB)</div>
-<small style="color:#aaa">100% Private - Phone nalle agutte</small>
-</label>
+<label for="fileInput" class="upload">📹 Click - Select Video (Upto 3GB)<br><small style="color:#aaa">100% Private - Phone nalliye</small></label>
 <input type="file" id="fileInput" accept="video/*">
-<div id="fileInfo" style="text-align:center;margin-top:10px;color:#aaa"></div>
+<div id="fileInfo" style="text-align:center;margin-top:8px;color:#aaa;font-size:13px"></div>
 </div>
-
-<div class="card" id="prevCard" style="display:none">
-<video id="v" controls></video>
-</div>
-
+<div class="card" id="prevCard" style="display:none"><video id="v" controls></video></div>
 <div class="card" id="ctrlCard" style="display:none">
-<div class="warn" id="warnBox" style="display:none">⚠️ Dodda file! 1.5GB+ idre Mobile nalli hang agbahudu. PC nalli try madi illa 2 part madi.</div>
-
-<label>Compression Mode (3GB -> 300MB ge):</label>
 <select id="quality">
-<option value="ultra">🔥 ULTRA - 3GB to ~300MB (360p, Best for size)</option>
-<option value="high" selected>⚡ HIGH - 3GB to ~500MB (480p, Good Quality)</option>
-<option value="medium">HD - 3GB to ~1GB (720p, Good Quality)</option>
+<option value="ultra">🔥 ULTRA 3GB→300MB (360p)</option>
+<option value="high" selected>⚡ HIGH 3GB→500MB (480p)</option>
 </select>
-
-<div style="display:flex;gap:10px">
-<div style="flex:1"><label>First Cut (sec):</label><input type="number" id="sTime" value="0" min="0"></div>
-<div style="flex:1"><label>End at (sec):</label><input type="number" id="eTime" value="0" min="0"></div>
+<div style="display:flex;gap:8px">
+<input type="number" id="sTime" placeholder="Start sec 0" value="0">
+<input type="number" id="eTime" placeholder="End sec 0=full" value="0">
 </div>
-
 <button class="btn" id="goBtn">🚀 COMPRESS NOW</button>
-<div id="log">Ready!</div>
-<div id="download" style="display:none"><a id="dl" download="compressed_300MB.mp4">⬇️ DOWNLOAD 300MB VIDEO</a><p id="finalSize" style="text-align:center;margin-top:8px;color:#22c55e"></p></div>
+<div id="log">Ready! Video select madi.</div>
+<div id="download" style="display:none;margin-top:10px"><a id="dl" style="display:block;background:#22c55e;color:#fff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:bold" download="compressed_300MB.mp4">⬇️ DOWNLOAD</a><p id="finalSize" style="text-align:center;margin-top:6px;color:#22c55e;font-size:13px"></p></div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
-<script>
-const fileInput=document.getElementById('fileInput'), v=document.getElementById('v'),
-prevCard=document.getElementById('prevCard'), ctrlCard=document.getElementById('ctrlCard'),
-fileInfo=document.getElementById('fileInfo'), logEl=document.getElementById('log'),
-goBtn=document.getElementById('goBtn'), dl=document.getElementById('dl'), download=document.getElementById('download'),
-warnBox=document.getElementById('warnBox');
-let file=null;
-function log(m){logEl.textContent+="\n"+m; logEl.scrollTop=logEl.scrollHeight;}
-
+<script type="module">
+import { FFmpeg } from 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js';
+import { fetchFile, toBlobURL } from 'https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js';
+const fileInput=document.getElementById('fileInput'), v=document.getElementById('v'), prevCard=document.getElementById('prevCard'), ctrlCard=document.getElementById('ctrlCard'), fileInfo=document.getElementById('fileInfo'), logEl=document.getElementById('log'), goBtn=document.getElementById('goBtn'), dl=document.getElementById('dl'), download=document.getElementById('download');
+let file=null, ffmpeg=null;
+function log(m){logEl.textContent+='\n'+m; logEl.scrollTop=logEl.scrollHeight;}
 fileInput.addEventListener('change',e=>{
  file=e.target.files[0]; if(!file) return;
- const sizeGB=(file.size/1024/1024/1024).toFixed(2);
- fileInfo.textContent=file.name+" - "+sizeGB+" GB ("+(file.size/1024/1024).toFixed(0)+" MB)";
- v.src=URL.createObjectURL(file);
- prevCard.style.display='block'; ctrlCard.style.display='block';
- if(file.size > 1.5*1024*1024*1024) warnBox.style.display='block'; else warnBox.style.display='none';
- log("Loaded: "+sizeGB+" GB file. Ready to compress to 300MB!");
+ fileInfo.textContent=file.name+' - '+(file.size/1024/1024/1024).toFixed(2)+' GB';
+ v.src=URL.createObjectURL(file); prevCard.style.display='block'; ctrlCard.style.display='block';
+ log('Loaded: '+(file.size/1024/1024).toFixed(0)+' MB');
 });
-
 goBtn.addEventListener('click', async()=>{
  if(!file) return alert('Video select madi');
- if(file.size > 2.5*1024*1024*1024){ if(!confirm('3GB file! Phone hang agbahudu. Continue?')) return; }
- goBtn.disabled=true; goBtn.textContent='Loading Compressor...'; download.style.display='none'; logEl.textContent='';
+ if(file.size>2*1024*1024*1024){ if(!confirm('File >2GB! Phone crash agbahudu! Continue?')) return; }
+ goBtn.disabled=true; goBtn.textContent='Loading...'; download.style.display='none'; logEl.textContent='';
  try{
-  const {createFFmpeg, fetchFile}=FFmpeg;
-  const ffmpeg=createFFmpeg({log:false});
-  await ffmpeg.load(); log("Compressor loaded!");
-  ffmpeg.FS('writeFile','in.mp4',await fetchFile(file));
+  if(!ffmpeg){
+   ffmpeg=new FFmpeg(); ffmpeg.on('progress',({progress})=>{ goBtn.textContent='Compressing... '+Math.round(progress*100)+'%'; });
+   ffmpeg.on('log',({message})=>{});
+   const base='https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+   await ffmpeg.load({coreURL: await toBlobURL(base+'/ffmpeg-core.js','text/javascript'), wasmURL: await toBlobURL(base+'/ffmpeg-core.wasm','application/wasm')});
+   log('Engine loaded!');
+  }
+  await ffmpeg.writeFile('in.mp4', await fetchFile(file));
   const mode=document.getElementById('quality').value;
-  let vf='scale=-2
+  let vf= mode=='ultra'? 'scale=-2:360' : 'scale=-2:480';
+  let crf= mode=='ultra'? '32' : '30';
+  let s=parseFloat(document.getElementById('sTime').value)||0;
+  let e=parseFloat(document.getElementById('eTime').value)||0;
+  let args=[]; if(s>0) args.push('-ss',s.toString()); args.push('-i','in.mp4');
+  if(e>0 && e>s) args.push('-to',e.toString());
+  args.push('-vf',vf,'-r','24','-c:v','libx264','-crf',crf,'-preset','ultrafast','-c:a','aac','-b:a','64k','-movflags','+faststart','out.mp4');
+  log('Compressing to '+mode+'...');
+  await ffmpeg.exec(args);
+  const data=await ffmpeg.readFile('out.mp4');
+  const blob=new Blob([data.buffer],{type:'video/mp4'});
+  dl.href=URL.createObjectURL(blob);
+  document.getElementById('finalSize').textContent='Final: '+(data.length/1024/1024).toFixed(1)+' MB (Original '+(file.size/1024/1024).toFixed(0)+' MB)';
+  download.style.display='block';
+  log('DONE! '+(file.size/data.length).toFixed(1)+'x compressed!');
+  goBtn.textContent='✅ DONE!';
+ }catch(err){log('Error: '+err.message); alert('Error: '+err.message+'\n\nPhone memory saku! PC nalli try madi!'); goBtn.textContent='Try Again';}
+ goBtn.disabled=false;
+});
+</script>
+</body>
+</html>
