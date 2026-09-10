@@ -2,60 +2,53 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3GB to 300MB Compressor - Fixed</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3GB to 300MB - WORKING</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0a;color:#fff;font-family:Arial;padding:15px}
-h1{text-align:center;margin:15px 0;font-size:26px}h1 span{color:#a855f7}
-.card{max-width:600px;margin:12px auto;background:#1a1a1a;padding:16px;border-radius:14px;border:1px solid #333}
-.upload{border:2px dashed #a855f7;border-radius:14px;padding:35px 10px;text-align:center;display:block;cursor:pointer}
+body{background:#0a0a0a;color:#fff;font-family:Arial;padding:12px}
+h1{text-align:center;margin:12px 0}h1 span{color:#a855f7}
+.card{max-width:600px;margin:10px auto;background:#1a1a1a;padding:14px;border-radius:12px;border:1px solid #333}
+.upload{border:2px dashed #a855f7;border-radius:12px;padding:30px;text-align:center;display:block}
 #fileInput{display:none}
 video{width:100%;border-radius:10px;background:#000}
-select,input,.btn{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:none}
-select,input{background:#222;color:#fff}
-.btn{background:#a855f7;color:#fff;font-weight:bold;font-size:17px}
-#log{background:#000;color:#0f0;padding:8px;border-radius:8px;font-size:11px;min-height:60px;max-height:150px;overflow:auto;white-space:pre-wrap}
+.btn{width:100%;padding:14px;background:#a855f7;color:#fff;border:none;border-radius:8px;font-weight:bold;font-size:18px;margin-top:8px}
+#log{background:#000;color:#0f0;padding:8px;border-radius:8px;font-size:12px;white-space:pre-wrap;min-height:50px;margin-top:8px}
 </style>
 </head>
 <body>
-<h1>3GB to <span>300MB</span> Fixed</h1>
+<h1>3GB to <span>300MB</span></h1>
 <div class="card">
-<label for="fileInput" class="upload">📹 Click - Select Video<br><small>First small video test madi</small></label>
+<label for="fileInput" class="upload">📹 Select Video<br><small>15MB test first</small></label>
 <input type="file" id="fileInput" accept="video/*">
-<div id="fileInfo" style="text-align:center;margin-top:8px;color:#aaa;font-size:13px"></div>
+<div id="info" style="text-align:center;color:#aaa;margin-top:8px"></div>
 </div>
-<div class="card" id="prevCard" style="display:none"><video id="v" controls></video></div>
-<div class="card" id="ctrlCard" style="display:none">
-<select id="quality"><option value="ultra">🔥 ULTRA 3GB→300MB (360p)</option><option value="high" selected>⚡ HIGH 500MB (480p)</option></select>
-<button class="btn" id="goBtn">🚀 COMPRESS NOW</button>
-<div id="log">Ready!</div>
-<div id="download" style="display:none;margin-top:10px"><a id="dl" style="display:block;background:#22c55e;color:#fff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:bold" download="compressed.mp4">⬇️ DOWNLOAD</a><p id="finalSize" style="text-align:center;margin-top:6px;color:#22c55e"></p></div>
-</div>
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+<div class="card" id="c2" style="display:none"><video id="v" controls></video><button class="btn" id="go">🚀 COMPRESS NOW</button><div id="log">Ready!</div><div id="dlBox" style="display:none"><a id="dl" download="compressed_300MB.mp4" style="display:block;background:#22c55e;color:#fff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;margin-top:10px;font-weight:bold">⬇️ DOWNLOAD</a></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script>
-const fileInput=document.getElementById('fileInput'), v=document.getElementById('v'), prevCard=document.getElementById('prevCard'), ctrlCard=document.getElementById('ctrlCard'), fileInfo=document.getElementById('fileInfo'), logEl=document.getElementById('log'), goBtn=document.getElementById('goBtn'), dl=document.getElementById('dl'), download=document.getElementById('download');
-let file=null;
-function log(m){logEl.textContent+='\n'+m; logEl.scrollTop=logEl.scrollHeight;}
-const { createFFmpeg, fetchFile } = FFmpeg;
-const ffmpeg = createFFmpeg({ log:true, corePath:'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js' });
-fileInput.addEventListener('change',e=>{file=e.target.files[0]; if(!file) return; fileInfo.textContent=file.name+' - '+(file.size/1024/1024).toFixed(1)+' MB'; v.src=URL.createObjectURL(file); prevCard.style.display='block'; ctrlCard.style.display='block'; log('Loaded: '+fileInfo.textContent);});
-goBtn.addEventListener('click', async()=>{
- if(!file) return alert('Video select madi');
- goBtn.disabled=true; goBtn.textContent='Loading Engine... (1st time 30sec)'; download.style.display='none';
+var file=null;
+var info=document.getElementById('info'), v=document.getElementById('v'), c2=document.getElementById('c2'), logEl=document.getElementById('log'), go=document.getElementById('go'), dl=document.getElementById('dl'), dlBox=document.getElementById('dlBox');
+function log(t){logEl.textContent+='\n'+t; logEl.scrollTop=9999;}
+document.getElementById('fileInput').addEventListener('change',function(e){file=e.target.files[0]; if(!file)return; info.textContent=file.name+' '+(file.size/1024/1024).toFixed(1)+'MB'; v.src=URL.createObjectURL(file); c2.style.display='block'; log('Loaded '+info.textContent);});
+var ffmpeg=null;
+go.addEventListener('click',async function(){
+ if(!file)return alert('Video select madi');
+ go.disabled=true; go.textContent='Loading engine 30sec wait...'; log('Downloading engine (30MB) please wait...');
  try{
-  if(!ffmpeg.isLoaded()){ log('Engine downloading... Wait 20-30sec...'); await ffmpeg.load(); log('Engine Ready!'); }
-  ffmpeg.setProgress(({ratio})=>{ goBtn.textContent='Compressing '+Math.round(ratio*100)+'%'; });
-  log('Writing file...'); await ffmpeg.FS('writeFile','in.mp4', await fetchFile(file));
-  const mode=document.getElementById('quality').value; let vf=mode=='ultra'?'scale=-2:360':'scale=-2:480'; let crf=mode=='ultra'?'32':'28';
-  log('Compressing to '+mode+'... Phone nalli 2-3min togutte...');
-  await ffmpeg.run('-i','in.mp4','-vf',vf,'-r','24','-c:v','libx264','-crf',crf,'-preset','ultrafast','-c:a','aac','-b:a','64k','out.mp4');
-  log('Reading...'); const data=ffmpeg.FS('readFile','out.mp4');
-  const blob=new Blob([data.buffer],{type:'video/mp4'}); dl.href=URL.createObjectURL(blob);
-  document.getElementById('finalSize').textContent='Original: '+(file.size/1024/1024).toFixed(0)+'MB -> New: '+(data.length/1024/1024).toFixed(1)+'MB';
-  download.style.display='block'; log('DONE! ✅'); goBtn.textContent='✅ DONE - Download below';
- }catch(err){log('Error: '+err.message); alert('Error: '+err.message+'\nWifi mele try madi!'); goBtn.textContent='Try Again';}
- goBtn.disabled=false;
+  if(!ffmpeg){ ffmpeg=FFmpeg.createFFmpeg({log:false}); await ffmpeg.load(); log('Engine ready!'); }
+  go.textContent='Compressing...';
+  log('Writing file...');
+  ffmpeg.FS('writeFile','input.mp4', await FFmpeg.fetchFile(file));
+  log('Compressing to 300MB... wait 1-2min');
+  await ffmpeg.run('-i','input.mp4','-vf','scale=-2:360','-r','24','-c:v','libx264','-crf','32','-preset','ultrafast','-c:a','aac','-b:a','64k','output.mp4');
+  var data=ffmpeg.FS('readFile','output.mp4');
+  var blob=new Blob([data.buffer],{type:'video/mp4'});
+  dl.href=URL.createObjectURL(blob);
+  dlBox.style.display='block';
+  log('DONE! '+(file.size/1024/1024).toFixed(0)+'MB -> '+(data.length/1024/1024).toFixed(1)+'MB');
+  go.textContent='✅ DONE';
+ }catch(e){ log('Error: '+e.message); alert(e.message); go.textContent='Try Again'; }
+ go.disabled=false;
 });
 </script>
 </body>
