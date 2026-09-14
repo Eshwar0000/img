@@ -1,55 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>3GB to 300MB - WORKING</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0a;color:#fff;font-family:Arial;padding:12px}
-h1{text-align:center;margin:12px 0}h1 span{color:#a855f7}
-.card{max-width:600px;margin:10px auto;background:#1a1a1a;padding:14px;border-radius:12px;border:1px solid #333}
-.upload{border:2px dashed #a855f7;border-radius:12px;padding:30px;text-align:center;display:block}
-#fileInput{display:none}
-video{width:100%;border-radius:10px;background:#000}
-.btn{width:100%;padding:14px;background:#a855f7;color:#fff;border:none;border-radius:8px;font-weight:bold;font-size:18px;margin-top:8px}
-#log{background:#000;color:#0f0;padding:8px;border-radius:8px;font-size:12px;white-space:pre-wrap;min-height:50px;margin-top:8px}
-</style>
-</head>
-<body>
-<h1>3GB to <span>300MB</span></h1>
-<div class="card">
-<label for="fileInput" class="upload">📹 Select Video<br><small>15MB test first</small></label>
-<input type="file" id="fileInput" accept="video/*">
-<div id="info" style="text-align:center;color:#aaa;margin-top:8px"></div>
-</div>
-<div class="card" id="c2" style="display:none"><video id="v" controls></video><button class="btn" id="go">🚀 COMPRESS NOW</button><div id="log">Ready!</div><div id="dlBox" style="display:none"><a id="dl" download="compressed_300MB.mp4" style="display:block;background:#22c55e;color:#fff;padding:12px;border-radius:8px;text-align:center;text-decoration:none;margin-top:10px;font-weight:bold">⬇️ DOWNLOAD</a></div></div>
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
-<script>
-var file=null;
-var info=document.getElementById('info'), v=document.getElementById('v'), c2=document.getElementById('c2'), logEl=document.getElementById('log'), go=document.getElementById('go'), dl=document.getElementById('dl'), dlBox=document.getElementById('dlBox');
-function log(t){logEl.textContent+='\n'+t; logEl.scrollTop=9999;}
-document.getElementById('fileInput').addEventListener('change',function(e){file=e.target.files[0]; if(!file)return; info.textContent=file.name+' '+(file.size/1024/1024).toFixed(1)+'MB'; v.src=URL.createObjectURL(file); c2.style.display='block'; log('Loaded '+info.textContent);});
-var ffmpeg=null;
-go.addEventListener('click',async function(){
- if(!file)return alert('Video select madi');
- go.disabled=true; go.textContent='Loading engine 30sec wait...'; log('Downloading engine (30MB) please wait...');
- try{
-  if(!ffmpeg){ ffmpeg=FFmpeg.createFFmpeg({log:false}); await ffmpeg.load(); log('Engine ready!'); }
-  go.textContent='Compressing...';
-  log('Writing file...');
-  ffmpeg.FS('writeFile','input.mp4', await FFmpeg.fetchFile(file));
-  log('Compressing to 300MB... wait 1-2min');
-  await ffmpeg.run('-i','input.mp4','-vf','scale=-2:360','-r','24','-c:v','libx264','-crf','32','-preset','ultrafast','-c:a','aac','-b:a','64k','output.mp4');
-  var data=ffmpeg.FS('readFile','output.mp4');
-  var blob=new Blob([data.buffer],{type:'video/mp4'});
-  dl.href=URL.createObjectURL(blob);
-  dlBox.style.display='block';
-  log('DONE! '+(file.size/1024/1024).toFixed(0)+'MB -> '+(data.length/1024/1024).toFixed(1)+'MB');
-  go.textContent='✅ DONE';
- }catch(e){ log('Error: '+e.message); alert(e.message); go.textContent='Try Again'; }
- go.disabled=false;
-});
-</script>
-</body>
-</html>
+<html><body style="background:black; color:white; text-align:center; font-family:sans-serif;">
+<h2>ರಾತ್ರಿ 12 ಗಂಟೆಯ ಕೊನೆಯ ಬಸ್ - Thriller</h2>
+<img src="https://i.pinimg.com/736x/5f/12/a2/5f12a2f5b8b7b8b8b8b8b8b8.jpg" style="width:90%; border-radius:10px;">
+<p>ರಾತ್ರಿ 12 ಗಂಟೆ, ರಮ್ಯಾ ಕೊನೆಯ ಬಸ್ ಗಾಗಿ ಕಾಯ್ತಿದ್ದಳು. ಇದ್ದಕ್ಕಿದ್ದಂತೆ ಡ್ರೈವರ್ ಇಲ್ಲದ ಒಂದು ಖಾಲಿ ಬಸ್ ಬಂತು...</p>
+<p><b>ನೀತಿ: ರಾತ್ರಿ ಹೊತ್ತು ಅಪರಿಚಿತ ವಾಹನ ಹತ್ತಬೇಡಿ!</b></p>
+</body></html>
